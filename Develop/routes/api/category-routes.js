@@ -6,14 +6,12 @@ const { Category, Product } = require('../../models');
 router.get('/', (req, res) => {
   // find all categories
   // be sure to include its associated Products
-  Category.findAll (
-    {
+  Category.findAll ({
       include: {
         model: Product,
-        attributes: ["productName"]
+        attributes: ["id","productName", "price", "stock", "categoryID"]
       }
-    }
-  )
+    })
   .then(categoryData => res.json(categoryData))
   .catch(err => {
     console.log(err);
@@ -30,21 +28,66 @@ router.get('/:id', (req, res) => {
     },
     include: {
       model: Product,
-      attributes: ["categoryID"]
+      attributes: ["id", "productID", "price", "stock", "categoryID"]
     }
+  })
+  .then(categoryData => res.json(categoryData))
+  .catch(err => {
+    console.log(err);
+    res.status(500).json(err);
   })
 });
 
 router.post('/', (req, res) => {
   // create a new category
+  Category.create({
+    categoryName: req.body.categoryName
+  })
+  .then(categoryData => res.json(categoryData))
+  .catch(err => {
+    console.log(err);
+    res.status(500).json(err);
+  })
 });
 
 router.put('/:id', (req, res) => {
   // update a category by its `id` value
+  Category.update({
+    where: {
+      id: req.params.id
+    }
+  })
+  .then(categoryData => {
+    if (!categoryData) {
+      res.status(404).json({message:"Category not found with given id."});
+      return;
+    }
+    res.json(categoryData);
+  })
+  .catch(err => {
+    console.log(err);
+    res.status(500).json(err);
+  });
 });
 
 router.delete('/:id', (req, res) => {
   // delete a category by its `id` value
+  Category.destroy({
+    where: {
+      id: req.params.id
+    }
+  })
+  .then(categoryData => {
+    if (!categoryData){
+      res.status(404).json({message: "Category not found with given id."});
+      return;
+    }
+    res.json(categoryData);
+  })
+  .catch(err => {
+    console.log(err);
+    res.status(500).json(err);
+  });
 });
 
 module.exports = router;
